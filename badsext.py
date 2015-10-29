@@ -1,6 +1,7 @@
 import tweepy
 import random
 import time
+import sys
 
 from tweepy.streaming import StreamListener
 import tweepy.api
@@ -82,27 +83,10 @@ OBJECT_PHRASES = [
 NUM_OBJS = len(OBJECT_PHRASES)
 
 
-class StoreStatusTextListener(StreamListener):
-    """ Records the text of streamed-in statuses in a list field """
-
-    def __init__(self, api, limit=10000):
-        self.texts = set()
-        self.my_limit = limit
-        self.api = api
-
-    def on_status(self, status):
-        self.texts.add(status.text)
-        return len(self.texts) < self.my_limit
-
-    def on_error(self, status):
-        try:
-            print "error", status
-        except:
-            print "unprintable error"
 
 
-def get_config():
-    with open('autopost.config', 'r') as infile:
+def get_config(filename):
+    with open(filename, 'r') as infile:
         config = {}
         for line in infile:
             spline = line.split(" = ")
@@ -149,7 +133,7 @@ def get_tweet(auth, verb, obj):
     num_seen = 0
     best_len = 140
     best = None
-    while num_seen < 10000:
+    while num_seen < 2000:
         try:
             tweet = raw_tweets.next()
             t = tweet.text
@@ -183,8 +167,8 @@ def get_tweet(auth, verb, obj):
     # print "\n ____::______ \n".join(ears.texts)
 
 
-def get_auth():
-    config = get_config()
+def get_auth(config_file):
+    config = get_config(config_file)
 
     ckey = config["CONSUMER_KEY"]
     csec = config["CONSUMER_SECRET"]
@@ -197,7 +181,7 @@ def get_auth():
 
 
 def main():
-    auth = get_auth()
+    auth = get_auth(sys.argv[1])
     tweet = None
     while tweet is None:
 

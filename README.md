@@ -8,7 +8,7 @@ tweets containing a few key present-tense phrases and just drop "SEXT:" in
 Run it with
 
 ```
-$ python badsext.py
+$ python badsext.py /path/to/config.file
 ```
 
 and it will draw a random present-tense verb and an object and hunt for sexts
@@ -16,8 +16,8 @@ in the wild out on Twitter.
  
 ## Dependencies
 
-You should make a file in the root of this repo called `autopost.config`, that
-looks like:
+You should make a filecalled `autopost.config`, and pass it in as the argument
+to the `badsext.py` routine. It should look like:
 
 ```
 CONSUMER_KEY = [the key] 
