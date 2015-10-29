@@ -26,7 +26,25 @@ VERB_PHRASES = [
     "you move",
     "i move",
     "i wiggle",
-    "you wiggle"
+    "you wiggle",
+    "i twist",
+    "you twist",
+    "i yell",
+    "you yell",
+    "i shout",
+    "you shout",
+    "i grab",
+    "you grab",
+    "i need",
+    "you need"
+    "i want",
+    "you want",
+    "i give",
+    "you give",
+    "i take",
+    "you take",
+    "i lift",
+    "you lift"
 ]
 NUM_VERBS = len(VERB_PHRASES)
 
@@ -51,7 +69,15 @@ OBJECT_PHRASES = [
     "book",
     "burp",
     "booty",
-    "bootie"
+    "bootie",
+    "facebook",
+    "twitter",
+    "tweet",
+    "animal",
+    "money",
+    "elbow",
+    "my arm",
+    "your arm"
 ]
 NUM_OBJS = len(OBJECT_PHRASES)
 
@@ -93,7 +119,7 @@ def split_sentences(text):
         if ch in demarcations:
             sents.append(sent)
             sent = ""
-    sents.append(sent)
+    sents.append(sent.strip())
     return sents
 
 
@@ -127,11 +153,12 @@ def get_tweet(auth, verb, obj):
         try:
             tweet = raw_tweets.next()
             t = tweet.text
-            sents = [clean_sent(s) for s in split_sentences(t)
-                     if len(s) < 134
-                     and s.lower().startswith(verb)]
-            if len(sents) > 0:
-                ssents = sorted(sents, key=lambda s: len(s))
+            clean_sents = [clean_sent(s) for s in split_sentences(t)]
+            good_sents = [s for s in clean_sents
+                          if len(s) < 90
+                          and s.lower().startswith(verb)]
+            if len(good_sents) > 0:
+                ssents = sorted(good_sents, key=lambda s: len(s))
                 if len(ssents[-1]) < best_len:
                     best = ssents[-1]
             time.sleep(0.1 + 0.0001*num_seen)
@@ -173,8 +200,12 @@ def main():
     auth = get_auth()
     tweet = None
     while tweet is None:
+
         verb = VERB_PHRASES[random.randint(0, len(VERB_PHRASES) - 1)]
         obj = OBJECT_PHRASES[random.randint(0, len(OBJECT_PHRASES) - 1)]
+
+        print "\n\n", verb, obj, "\n\n"
+
         tweet = get_tweet(auth, verb, obj)
     print tweet
     api = tweepy.API(auth)
