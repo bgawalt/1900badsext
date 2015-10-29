@@ -116,7 +116,7 @@ def get_tweet(auth, verb, obj):
                 ssents = sorted(sents, key=lambda s: len(s))
                 if len(ssents[-1]) < best_len:
                     best = ssents[-1]
-            time.sleep(0.1)
+            time.sleep(0.1 + 0.0001*num_seen)
             num_seen += 1
         except tweepy.TweepError:
             print " TAKIN A BREATHER "
@@ -155,8 +155,12 @@ def main():
     auth = get_auth()
     tweet = None
     while tweet is None:
-        tweet = get_tweet(auth, "i try", "boob")
+        verb = VERB_PHRASES[random.randint(0, len(VERB_PHRASES) - 1)]
+        obj = OBJECT_PHRASES[random.randint(0, len(OBJECT_PHRASES) - 1)]
+        tweet = get_tweet(auth, verb, obj)
     print tweet
+    api = tweepy.API(auth)
+    api.update_status(status=tweet)
 
 
 if __name__ == "__main__":
