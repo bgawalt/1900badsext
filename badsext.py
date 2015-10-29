@@ -1,20 +1,25 @@
 import tweepy
 import random
+import time
 
 from tweepy.streaming import StreamListener
 from tweepy import Stream
-from tweepy.api import API
+import tweepy.api
 
 VERB_PHRASES = [
     "i try",
     "i make",
     "i press",
+    "i pull",
     "i hold",
     "you try",
     "you make",
     "you push",
-    "i jiggle"
+    "you pull",
+    "i jiggle",
+    "you jiggle"
 ]
+NUM_VERBS = len(VERB_PHRASES)
 
 
 OBJECT_PHRASES = [
@@ -25,8 +30,11 @@ OBJECT_PHRASES = [
     "navel",
     "both arms",
     "dewlap",
-    "lips"
+    "lips",
+    "my hair",
+    "all over"
 ]
+NUM_OBJS = len(OBJECT_PHRASES)
 
 
 class StoreStatusTextListener(StreamListener):
@@ -57,12 +65,6 @@ def get_config():
     return config
 
 
-def nltk_test():
-
-    sents = nltk.tokenize.sent_tokenize(text)
-    print " _:_:_:__:_".join(sents)
-
-
 def split_sentences(text):
     sents = []
     demarcations = set(".!?")
@@ -76,8 +78,56 @@ def split_sentences(text):
     return sents
 
 
+def get_tweet(auth):
+    api = tweepy.API(auth)
+    #ears = StoreStatusTextListener(api, limit=3)
 
-def get_api():
+    verb = VERB_PHRASES[2]
+    obj = OBJECT_PHRASES[2]
+
+    verb = "i meant"
+    obj = "leg"
+
+    print verb, obj
+
+    query = '"%s" "%s"' % (verb, obj)
+
+    print "query:", query
+
+    doug = tweepy.Cursor(api.search,
+                        q=query,
+                        #rpp=100,
+                        result_type="recent",
+                        include_entities=False,
+                        lang="en").items()
+
+    num_seen = 0
+
+    while num_seen < 10000:
+        try:
+            tweet = doug.next()
+            t = tweet.text
+            if t.lower().startswith(verb):
+                print t
+            else:
+                print "UGH"
+            time.sleep(0.1)
+            num_seen += 1
+        except tweepy.TweepError:
+            print " TAKIN A BREATHER "
+            time.sleep(60*15)
+
+
+    # try:
+    #     stream = Stream(auth, ears, timeout=5.0)
+    #     stream.filter(track=('"%s" "%s"' % (verb, obj)), languages=("en",))
+    # except:
+    #     print "Problem after", len(ears.texts)
+    #
+    # print "\n ____::______ \n".join(ears.texts)
+
+
+def get_auth():
     config = get_config()
 
     ckey = config["CONSUMER_KEY"]
@@ -87,15 +137,12 @@ def get_api():
     
     auth = tweepy.OAuthHandler(ckey, csec)
     auth.set_access_token(akey, asec)
-    return tweepy.API(auth)
+    return auth
 
 
 def main():
-    #api = get_api()
-    #
-    # api.update_status(status="SEXT: I made a teddy bear out of your belly button lint.")
-    text = "This is indeed a dark and most disturbing universe. If I had a nickel, then I could buy a motor-cycle. charging up a fitbit in my usb"
-    print "\n\n..___..___..\n\n".join(split_sentences(text))
+    auth = get_auth()
+    get_tweet(auth)
 
 
 if __name__ == "__main__":
