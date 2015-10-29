@@ -140,7 +140,8 @@ def get_tweet(auth, verb, obj):
             clean_sents = [clean_sent(s) for s in split_sentences(t)]
             good_sents = [s for s in clean_sents
                           if len(s) < 90
-                          and s.lower().startswith(verb)]
+                          and s.lower().startswith(verb)
+                          and obj in s.lower()]
             if len(good_sents) > 0:
                 ssents = sorted(good_sents, key=lambda s: len(s))
                 if len(ssents[-1]) < best_len:
