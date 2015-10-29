@@ -3,7 +3,6 @@ import random
 import time
 
 from tweepy.streaming import StreamListener
-from tweepy import Stream
 import tweepy.api
 
 VERB_PHRASES = [
@@ -17,7 +16,9 @@ VERB_PHRASES = [
     "you push",
     "you pull",
     "i jiggle",
-    "you jiggle"
+    "you jiggle",
+    "i hurt",
+    "you hurt"
 ]
 NUM_VERBS = len(VERB_PHRASES)
 
@@ -78,44 +79,54 @@ def split_sentences(text):
     return sents
 
 
-def get_tweet(auth):
+def actual_pos(target, text):
+    raw_pos = text.find(target)
+    return raw_pos if raw_pos > -1 else len(text)
+
+
+def clean_sent(sent):
+    link_pos = actual_pos("http://", sent)
+    slink_pos = actual_pos("https://", sent)
+    hash_pos = actual_pos("#", sent)
+    return sent[:min((link_pos, slink_pos, hash_pos))].replace("@", "[at]")
+
+
+def get_tweet(auth, verb, obj):
     api = tweepy.API(auth)
-    #ears = StoreStatusTextListener(api, limit=3)
-
-    verb = VERB_PHRASES[2]
-    obj = OBJECT_PHRASES[2]
-
-    verb = "i meant"
-    obj = "leg"
-
-    print verb, obj
 
     query = '"%s" "%s"' % (verb, obj)
 
-    print "query:", query
-
-    doug = tweepy.Cursor(api.search,
-                        q=query,
-                        #rpp=100,
-                        result_type="recent",
-                        include_entities=False,
-                        lang="en").items()
+    raw_tweets = tweepy.Cursor(api.search,
+                               q=query,
+                               result_type="recent",
+                               include_entities=False,
+                               lang="en").items()
 
     num_seen = 0
-
+    best_len = 140
+    best = None
     while num_seen < 10000:
         try:
-            tweet = doug.next()
+            tweet = raw_tweets.next()
             t = tweet.text
-            if t.lower().startswith(verb):
-                print t
-            else:
-                print "UGH"
+            sents = [clean_sent(s) for s in split_sentences(t)
+                     if len(s) < 134
+                     and s.lower().startswith(verb)]
+            if len(sents) > 0:
+                ssents = sorted(sents, key=lambda s: len(s))
+                if len(ssents[-1]) < best_len:
+                    best = ssents[-1]
             time.sleep(0.1)
             num_seen += 1
         except tweepy.TweepError:
             print " TAKIN A BREATHER "
             time.sleep(60*15)
+        except StopIteration:
+            break
+    if best is None:
+        return best
+    else:
+        return "SEXT: " + best
 
 
     # try:
@@ -142,7 +153,10 @@ def get_auth():
 
 def main():
     auth = get_auth()
-    get_tweet(auth)
+    tweet = None
+    while tweet is None:
+        tweet = get_tweet(auth, "i try", "boob")
+    print tweet
 
 
 if __name__ == "__main__":
