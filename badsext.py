@@ -18,7 +18,15 @@ VERB_PHRASES = [
     "i jiggle",
     "you jiggle",
     "i hurt",
-    "you hurt"
+    "you hurt",
+    "i toss",
+    "you toss",
+    "i shove",
+    "you shove",
+    "you move",
+    "i move",
+    "i wiggle",
+    "you wiggle"
 ]
 NUM_VERBS = len(VERB_PHRASES)
 
@@ -26,14 +34,24 @@ NUM_VERBS = len(VERB_PHRASES)
 OBJECT_PHRASES = [
     "your leg",
     "my leg",
-    "tongues",
     "a finger",
-    "navel",
-    "both arms",
-    "dewlap",
-    "lips",
-    "my hair",
-    "all over"
+    "all over",
+    "mess",
+    "oops",
+    "toes",
+    "knob",
+    "hooter",
+    "boob",
+    "junk",
+    "tears",
+    "my drink",
+    "your drink",
+    "dumb",
+    "phone",
+    "book",
+    "burp",
+    "booty",
+    "bootie"
 ]
 NUM_OBJS = len(OBJECT_PHRASES)
 
