@@ -3,7 +3,6 @@ import random
 import time
 import sys
 
-from tweepy.streaming import StreamListener
 import tweepy.api
 
 VERB_PHRASES = [
@@ -45,7 +44,9 @@ VERB_PHRASES = [
     "i take",
     "you take",
     "i lift",
-    "you lift"
+    "you lift",
+    "i find",
+    "you find"
 ]
 NUM_VERBS = len(VERB_PHRASES)
 
@@ -82,7 +83,12 @@ OBJECT_PHRASES = [
 ]
 NUM_OBJS = len(OBJECT_PHRASES)
 
-
+BAD_WORDS = [
+    "nigg",
+    "fag",
+    "cunt",
+    "bitch"
+]
 
 
 def get_config(filename):
@@ -156,16 +162,10 @@ def get_tweet(auth, verb, obj):
     if best is None:
         return best
     else:
+        for bad_word in BAD_WORDS:
+            if bad_word in best:
+                return None
         return "SEXT: " + best
-
-
-    # try:
-    #     stream = Stream(auth, ears, timeout=5.0)
-    #     stream.filter(track=('"%s" "%s"' % (verb, obj)), languages=("en",))
-    # except:
-    #     print "Problem after", len(ears.texts)
-    #
-    # print "\n ____::______ \n".join(ears.texts)
 
 
 def get_auth(config_file):
@@ -192,7 +192,10 @@ def main():
         print "\n\n", verb, obj, "\n\n"
 
         tweet = get_tweet(auth, verb, obj)
-    print tweet
+    try:
+        print tweet
+    except UnicodeEncodeError:
+        print "[Trouble Printing Tweet]"
     api = tweepy.API(auth)
     api.update_status(status=tweet)
 
